@@ -40,21 +40,24 @@ internal abstract record VMInlineOperandData(VMInlineOperandType Type)
 internal record VMTypeData : VMInlineOperandData
 {
     public string Name { get; }
-    public bool HasGenericTypeParameters { get; }
-    public bool IsGenericParameterIndex { get; }
-    public int GenericMethodParameterIndex { get; }
-    public int GenericTypeParameterIndex { get; }
-    public VMInlineOperand[] GenericParameters { get; }
+    public bool HasGenericTypeArgs { get; }
+    public bool IsGenericParameterType { get; }
+    public int GenericArgumentIndex { get; }
+    public int GenericTypeArgumentIndex { get; }
+    public VMInlineOperand[] GenericTypes { get; }
 
-    
+    public TypeName TypeName { get; }
+
     public VMTypeData(BinaryReader reader) : base(VMInlineOperandType.Type)
     {
         Name = reader.ReadString();
-        HasGenericTypeParameters = reader.ReadBoolean();
-        IsGenericParameterIndex = reader.ReadBoolean();
-        GenericMethodParameterIndex = reader.ReadInt32();
-        GenericTypeParameterIndex = reader.ReadInt32();
-        GenericParameters = VMInlineOperand.ReadArrayInternal(reader);
+        HasGenericTypeArgs = reader.ReadBoolean();
+        IsGenericParameterType = reader.ReadBoolean();
+        GenericArgumentIndex = reader.ReadInt32();
+        GenericTypeArgumentIndex = reader.ReadInt32();
+        GenericTypes = VMInlineOperand.ReadArrayInternal(reader);
+
+        TypeName = new TypeName(Name);
     }
 }
 
@@ -66,7 +69,7 @@ internal record VMFieldData : VMInlineOperandData
     public VMInlineOperand DeclaringType { get; }
     public string Name { get; }
     public bool IsStatic { get; }
-    
+
     public BindingFlags BindingFlags
     {
         get
@@ -76,7 +79,7 @@ internal record VMFieldData : VMInlineOperandData
             return bindingFlags;
         }
     }
-    
+
     public VMFieldData(BinaryReader reader) : base(VMInlineOperandType.Field)
     {
         DeclaringType = VMInlineOperand.ReadInternal(reader);
@@ -91,14 +94,24 @@ internal record VMFieldData : VMInlineOperandData
 internal record VMMethodData : VMInlineOperandData
 {
     public VMInlineOperand DeclaringType { get; }
-    public byte Flags { get; } 
-    
+    public byte Flags { get; }
+
     public bool IsStatic { get; }
-    public bool HasGenericParameters { get; }
-    public string Name { get; } 
-    public VMInlineOperand ReturnType { get; } 
+    public bool HasGenericArguments { get; }
+    public string Name { get; }
+    public VMInlineOperand ReturnType { get; }
     public VMInlineOperand[] Parameters { get; }
-    public VMInlineOperand[] GenericParameters { get; }
+    public VMInlineOperand[] GenericArguments { get; }
+
+    public BindingFlags BindingFlags
+    {
+        get
+        {
+            var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
+            bindingFlags |= IsStatic ? BindingFlags.Static : BindingFlags.Instance;
+            return bindingFlags;
+        }
+    }
 
     public VMMethodData(BinaryReader reader) : base(VMInlineOperandType.Method)
     {
@@ -106,11 +119,11 @@ internal record VMMethodData : VMInlineOperandData
         Flags = reader.ReadByte();
         // these constants are also different between versions (#3)
         IsStatic = (Flags & 1) > 0;
-        HasGenericParameters = (Flags & 2) > 0;
+        HasGenericArguments = (Flags & 2) > 0;
         Name = reader.ReadString();
         ReturnType = VMInlineOperand.ReadInternal(reader);
         Parameters = VMInlineOperand.ReadArrayInternal(reader);
-        GenericParameters = VMInlineOperand.ReadArrayInternal(reader);
+        GenericArguments = VMInlineOperand.ReadArrayInternal(reader);
     }
 }
 
@@ -139,7 +152,7 @@ internal record VMEazCallData : VMInlineOperandData
     /// Contains the flags of the vm method contained.
     /// </summary>
     public int EazCallValue { get; }
-    
+
     /// <summary>
     /// The method's operand data vm stream position.
     /// </summary>
