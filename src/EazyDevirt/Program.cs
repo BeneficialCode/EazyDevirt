@@ -1,4 +1,4 @@
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using AsmResolver.DotNet.Builder;
@@ -13,6 +13,7 @@ internal static class Program
     private static readonly Version CurrentVersion = new("1.0.0");
     private static readonly Version CurrentEazVersion = new("2022.2.763.35371");
 
+    // de4dot --dont-rename --keep-types --preserve-tokens xxx.exe
     private static async Task Main(params string[] args)
     {
         var parser = BuildParser();

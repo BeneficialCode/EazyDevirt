@@ -42,7 +42,9 @@ internal record Clt : IOpCodePattern
 
     public bool MatchEntireBody => false;
 
-    public bool Verify(VMOpCode vmOpCode, int index = 0) => PatternMatcher.MatchesPattern(new CltInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index = 0) => 
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new CltInnerPattern(),
         (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index].Operand as SerializedMethodDefinition)!);
 }
 #endregion Clt
@@ -84,7 +86,9 @@ internal record Clt_Un : IOpCodePattern
 
     public bool MatchEntireBody => false;
 
-    public bool Verify(VMOpCode vmOpCode, int index = 0) => PatternMatcher.MatchesPattern(new Clt_UnInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index = 0) => 
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new Clt_UnInnerPattern(),
         (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index].Operand as SerializedMethodDefinition)!);
 }
 #endregion Clt
@@ -125,7 +129,9 @@ internal record Cgt : IOpCodePattern
 
     public bool MatchEntireBody => false;
 
-    public bool Verify(VMOpCode vmOpCode, int index = 0) => PatternMatcher.MatchesPattern(new CgtInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index = 0) => 
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new CgtInnerPattern(),
         (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index].Operand as SerializedMethodDefinition)!);
 }
 
@@ -168,7 +174,9 @@ internal record Cgt_Un : IOpCodePattern
 
     public bool MatchEntireBody => false;
 
-    public bool Verify(VMOpCode vmOpCode, int index = 0) => PatternMatcher.MatchesPattern(new Cgt_UnInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index = 0) => 
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new Cgt_UnInnerPattern(),
         (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index].Operand as SerializedMethodDefinition)!);
 }
 
@@ -214,7 +222,9 @@ internal record Ceq : IOpCodePattern
 
     public bool MatchEntireBody => false;
 
-    public bool Verify(VMOpCode vmOpCode, int index = 0) => PatternMatcher.MatchesPattern(new CeqInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index = 0) => 
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new CeqInnerPattern(),
         (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index].Operand as SerializedMethodDefinition)!);
 }
 #endregion Ceq

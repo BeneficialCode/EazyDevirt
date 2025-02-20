@@ -3,9 +3,11 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Cil;
 using EazyDevirt.Core.Abstractions;
+using EazyDevirt.Core.Abstractions.Interfaces;
 using EazyDevirt.Core.IO;
 using EazyDevirt.PatternMatching;
 using EazyDevirt.PatternMatching.Patterns;
+using Org.BouncyCastle.Asn1.Cmp;
 using Org.BouncyCastle.Math;
 
 #pragma warning disable CS8618
@@ -46,8 +48,8 @@ internal sealed class ResourceParsing : StageBase
                 {
                     Ctx.Console.InfoStr("VM Resource Stream Getter", _resourceGetterMethod!.MetadataToken);
                     Ctx.Console.InfoStr("VM Resource Stream Initializer", _resourceInitializationMethod!.MetadataToken);
-                    Ctx.Console.InfoStr("VM Resource Modulus String Method",
-                        _resourceModulusStringMethod!.MetadataToken);
+                    //Ctx.Console.InfoStr("VM Resource Modulus String Method",
+                    //    _resourceModulusStringMethod!.MetadataToken);
                 }
             }
 
@@ -71,7 +73,7 @@ internal sealed class ResourceParsing : StageBase
                 Ctx.Console.Error("Failed to get VM resource stream key byte array.");
                 found = false;
             }
-
+       
             _keyBytes = ((DataSegment)a1.FieldRva!).Data;
             if (Ctx.Options.Verbose)
             {
@@ -82,6 +84,10 @@ internal sealed class ResourceParsing : StageBase
 
             _modulusString = _resourceModulusStringMethod!.CilMethodBody!.Instructions.FirstOrDefault
                 (i => i.OpCode == CilOpCodes.Ldstr)?.Operand?.ToString()!;
+            if(_modulusString == null)
+            {
+                _modulusString = "xjCxZdBSUWeYfAFjmNMJGz3FMdHLrPts3Y4qxq5NB9MECf3FnKNymtYH3WPLOp23cIOA+gc8XoVHrIrkyFirT6OX9g+xy/9jvZaguojcybxdWqJK1R7CP81QH/KrBBOr1zxOVUrDdP5v3hksZNGTlVd8JF9AOLHmr8BhmumhdHk=";
+            }
             if (string.IsNullOrWhiteSpace(_modulusString))
             {
                 Ctx.Console.Error("VM resource modulus string is null.");
@@ -124,23 +130,57 @@ internal sealed class ResourceParsing : StageBase
     {
         foreach (var type in Ctx.Module.GetAllTypes())
         {
-            if (_resourceGetterMethod != null && _resourceInitializationMethod != null) return true;
+            if (_resourceGetterMethod != null && _resourceInitializationMethod != null) 
+                return true;
             foreach (var method in type.Methods.Where(m =>
                          m is { Managed: true, IsPublic: true, IsStatic: true } &&
                          m.Signature?.ReturnType.FullName == typeof(Stream).FullName))
             {
-                if (_resourceGetterMethod != null && _resourceInitializationMethod != null) return true;
-                if (_resourceGetterMethod != null ||
-                    !PatternMatcher.MatchesPattern(new GetVMStreamPattern(), method)) continue;
+                if (_resourceGetterMethod != null && _resourceInitializationMethod != null) 
+                    return true;
+                // 打印Token
+                Console.WriteLine($"method: {method.MetadataToken}");
+
+                IPattern pattern = new GetVMStreamPattern();
+
+                if (_resourceGetterMethod != null ||!PatternMatcher.MatchesPattern(pattern, method)) 
+                    continue;
                 
                 _resourceGetterMethod = method;
-                _resourceInitializationMethod =
-                    (SerializedMethodDefinition)method.CilMethodBody!.Instructions[13].Operand!;
-                _resourceModulusStringMethod =
-                    (SerializedMethodDefinition)method.CilMethodBody!.Instructions[12].Operand!;
+
+                int count = pattern.Pattern.Count();
+                int idx = 0;
+                for(int i=count;i< method.CilMethodBody!.Instructions.Count; i++)
+                {
+                    if(method.CilMethodBody!.Instructions[i].OpCode == CilOpCodes.Call)
+                    {
+
+                        if (idx == 0)
+                        {
+                            
+                            string name = method.CilMethodBody!.Instructions[i].Operand!.ToString();
+                            Console.WriteLine($"method: {name}");
+                            if (name.IndexOf("InitializeArray") == -1)
+                            {
+                                idx = i;
+                                _resourceModulusStringMethod = (SerializedMethodDefinition)method.CilMethodBody!.Instructions[i].Operand!;
+                            }
+                        }
+                        else
+                        {
+                            _resourceInitializationMethod = (SerializedMethodDefinition)method.CilMethodBody!.Instructions[i].Operand!;
+                            break;
+                        }
+                    }
+                }
+
+                //_resourceInitializationMethod =
+                //    (SerializedMethodDefinition)method.CilMethodBody!.Instructions[13].Operand!;
+                //_resourceModulusStringMethod =
+                //    (SerializedMethodDefinition)method.CilMethodBody!.Instructions[12].Operand!;
                 var getVmInstanceMethod = type.Methods.First(m =>
                     m.MetadataToken != _resourceGetterMethod.MetadataToken &&
-                    m.MetadataToken != _resourceModulusStringMethod.MetadataToken);
+                    m.MetadataToken != _resourceModulusStringMethod!.MetadataToken);
 
                 if (!getVmInstanceMethod.Signature!.ReturnsValue)
                     throw new Exception("Failed to get VM Declaring type!");

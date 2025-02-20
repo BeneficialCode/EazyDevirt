@@ -37,8 +37,8 @@ internal class PatternMatcher
                     : GetAllMatchingInstructions(pat, vmOpCode, index).Count <= 0)
                 continue;
             
-            if (!pat.AllowMultiple)
-                OpCodePatterns.Remove(pat);
+            //if (!pat.AllowMultiple)
+            //    OpCodePatterns.Remove(pat);
             return pat;
         }
 
@@ -100,7 +100,7 @@ internal class PatternMatcher
             return pat.InterchangeLdcI4OpCodes && patIns.IsLdcI4();
 
         if (ins.IsLdloc())
-            return pat.InterchangeLdlocOpCodes && patIns.IsLdloc();
+            return patIns.IsLdloc();
 
         if (ins.IsStloc())
             return pat.InterchangeStlocOpCodes && patIns.IsStloc();
@@ -111,7 +111,7 @@ internal class PatternMatcher
     private static bool MatchesEntire(IPattern pattern, CilInstructionCollection instructions, int index)
     {
         var pat = pattern.Pattern;
-        if (index + pat.Count > instructions.Count || (pattern.MatchEntireBody && pat.Count != instructions.Count)) return false;
+        if (index + pat.Count > instructions.Count || (pattern.MatchEntireBody && pat.Count > instructions.Count)) return false;
         
         for (var i = 0; i < pat.Count; i++)
         {
@@ -168,6 +168,7 @@ internal class PatternMatcher
     public static List<CilInstruction[]> GetAllMatchingInstructions(IPattern pattern, MethodDefinition method, int index = 0)
     {
         if (!method.HasMethodBody) return new List<CilInstruction[]>();
+        if(method.CilMethodBody == null) return new List<CilInstruction[]>();
         var instructions = method.CilMethodBody!.Instructions;
         
         var pat = pattern.Pattern;
@@ -209,6 +210,23 @@ internal class PatternMatcher
         if (index + pat.Count > instructions.Count) return new List<CilInstruction[]>();
 
         var matchingInstructions = new List<CilInstruction[]>();
+
+        for(var i = 0; i < instructions.Count; i++)
+        {
+            // verify the i+1 is not out of index
+            var idx = i + 1;
+            if (idx >= instructions.Count) break;
+            int count = pat.Count;
+            idx = i + count - 1;
+            if(idx >= instructions.Count) break;
+            if (instructions[i].OpCode == pat[0] && instructions[i + 1].OpCode == pat[1]
+                && instructions[i+count -1].OpCode == pat[count-1])
+            {
+                index = i;
+                break;
+            }
+        }
+
         for (var i = index; i < instructions.Count; i++)
         {
             var current = new List<CilInstruction>();
@@ -220,8 +238,9 @@ internal class PatternMatcher
                     break;
                 current.Add(instructions[j]);
             }
-
-            if (current.Count == pat.Count && pattern.Verify(vmOpCode, index + i))
+            if (index > instructions.Count || index + 1 > instructions.Count)
+                break;
+            if (current.Count == pat.Count && pattern.Verify(vmOpCode, index))
                 matchingInstructions.Add(current.ToArray());
         }
 

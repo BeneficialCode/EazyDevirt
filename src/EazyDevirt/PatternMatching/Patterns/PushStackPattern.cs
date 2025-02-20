@@ -10,8 +10,8 @@ internal record PushStackPattern : IPattern
     { 
         CilOpCodes.Ldarg_1,     // 0	0000	ldarg.1
         CilOpCodes.Brtrue_S,    // 1	0001	brtrue.s	6 (000F) ldarg.1 
-        CilOpCodes.Nop,         // 2	0003	nop
         CilOpCodes.Ldstr,       // 3	0004	ldstr	"obj"
+        CilOpCodes.Nop,         // 2	0003	nop
         CilOpCodes.Newobj,      // 4	0009	newobj	instance void [mscorlib]System.ArgumentNullException::.ctor(string)
         CilOpCodes.Throw,       // 5	000E	throw
         CilOpCodes.Ldarg_1,     // 6	000F	ldarg.1

@@ -34,6 +34,7 @@ internal record Newarr : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 1 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 1].Operand is SerializedMemberReference
         {
             FullName: "System.Array System.Array::CreateInstance(System.Type, System.Int32)"
@@ -109,6 +110,7 @@ internal record Ldelem : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 2 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new LdelemInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 2].Operand as SerializedMethodDefinition)!);
 }
@@ -454,6 +456,7 @@ internal record Stelem : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 2 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new StelemInnerHelperPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 2].Operand as SerializedMethodDefinition)!);
 }
@@ -521,6 +524,7 @@ internal record Stelem_I1 : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 6 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new StelemInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 6].Operand as SerializedMethodDefinition)!)
         && vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 1].Operand is SerializedTypeReference
@@ -551,6 +555,7 @@ internal record Stelem_I2 : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 6 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new StelemInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 6].Operand as SerializedMethodDefinition)!)
         && vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 1].Operand is SerializedTypeReference
@@ -581,6 +586,7 @@ internal record Stelem_I4 : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 6 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new StelemInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 6].Operand as SerializedMethodDefinition)!)
         && vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 1].Operand is SerializedTypeReference
@@ -611,6 +617,7 @@ internal record Stelem_I8 : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 6 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new StelemInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 6].Operand as SerializedMethodDefinition)!)
         && vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 1].Operand is SerializedTypeReference

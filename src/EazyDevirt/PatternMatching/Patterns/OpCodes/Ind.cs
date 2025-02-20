@@ -305,6 +305,7 @@ internal record Ldobj : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
+        index + 2 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         PatternMatcher.MatchesPattern(new LdindInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 2].Operand as SerializedMethodDefinition)!);
 }

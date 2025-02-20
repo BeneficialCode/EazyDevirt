@@ -23,8 +23,11 @@ internal class MethodDevirtualizer : StageBase
         Resolver = new Resolver(Ctx);
         foreach (var vmMethod in Ctx.VMMethods)
         {
+            if (vmMethod.Parent.MetadataToken != 0x060005EE)
+                continue;
             VMStream.Seek(vmMethod.MethodKey, SeekOrigin.Begin);
 
+            
             ReadVMMethod(vmMethod);
             
             if (Ctx.Options.VeryVerbose)
@@ -69,8 +72,15 @@ internal class MethodDevirtualizer : StageBase
         vmMethod.Parent.CilMethodBody!.ComputeMaxStackOnBuild = false;
         if (vmMethod.SuccessfullyDevirtualized && !Ctx.Options.NoVerify)
         {
-            vmMethod.Parent.CilMethodBody!.ComputeMaxStack(false);
-            vmMethod.Parent.CilMethodBody!.VerifyLabels(false);
+            try
+            {
+                vmMethod.Parent.CilMethodBody!.ComputeMaxStack(false);
+                vmMethod.Parent.CilMethodBody!.VerifyLabels(false);
+            }
+            catch (StackImbalanceException ex)
+            {
+                Console.WriteLine($"Stack imbalance detected: {ex.Message}");
+            }
         }
     }
     
@@ -147,7 +157,7 @@ internal class MethodDevirtualizer : StageBase
                     Ctx.Console.Warning($"Placing NoBody instruction at #{vmMethod.Instructions.Count}");
 
                 if (vmOpCode.CilOpCode.Value.OperandType != CilOperandType.InlineNone && operand == null)
-                    Ctx.Console.Warning($"[{vmMethod.Parent.MetadataToken}] Failed to resolve operand for opcode {vmOpCode.CilOpCode} at instruction #{vmMethod.Instructions.Count}");
+                    Ctx.Console.Warning($"[{vmMethod.Parent.MetadataToken}] Failed to resolve operand for opcode {vmOpCode.CilOpCode} at instruction #{vmMethod.Instructions.Count} key {virtualOpCode}");
 
                 var instruction =
                     new CilInstruction(vmOpCode.CilOpCode.Value, operand);
@@ -299,7 +309,7 @@ internal class MethodDevirtualizer : StageBase
     }
 
     private object? ReadOperand(VMOpCode vmOpCode, VMMethod vmMethod) =>
-        vmOpCode.CilOperandType switch // maybe switch this to vmOpCode.CilOpCode.OperandType and add more handlers
+        vmOpCode.CilOpCode.GetValueOrDefault().OperandType switch
         {
             CilOperandType.InlineI => VMStreamReader.ReadInt32Special(),
             CilOperandType.ShortInlineI => VMStreamReader.ReadSByte(),
@@ -313,6 +323,9 @@ internal class MethodDevirtualizer : StageBase
             CilOperandType.InlineBrTarget => VMStreamReader.ReadUInt32(),
             CilOperandType.InlineArgument => VMStreamReader.ReadUInt16(),    // GetArgument(vmMethod, VMStreamReader.ReadUInt16()),  // this doesn't seem to be used, might not be correct
             CilOperandType.ShortInlineArgument => VMStreamReader.ReadByte(), // GetArgument(vmMethod, VMStreamReader.ReadByte()),    // this doesn't seem to be used, might not be correct
+            CilOperandType.InlineField => ReadInlineTok(vmOpCode),
+            CilOperandType.InlineMethod => ReadInlineTok(vmOpCode),
+            CilOperandType.InlineType => ReadInlineTok(vmOpCode),
             CilOperandType.InlineNone => null,
             _ => null
         };

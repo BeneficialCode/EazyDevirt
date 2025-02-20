@@ -24,12 +24,12 @@ internal record GetVMStreamPattern : IPattern
         CilOpCodes.Newarr,      // 8	0025	newarr	[System.Runtime]System.Byte
         CilOpCodes.Dup,         // 9	002A	dup
         CilOpCodes.Ldtoken,     // 10	002B	ldtoken	valuetype VMResourceStreamGetter/a1 VMResourceStreamGetter::a1
-        CilOpCodes.Call,        // 11	0030	call	void [mscorlib]System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(class [mscorlib]System.Array, valuetype [mscorlib]System.RuntimeFieldHandle)
-        CilOpCodes.Call,        // 12	0035	call	string VMResourceStreamGetter::GetVMResourceModulusString()
-        CilOpCodes.Call,        // 13	003A	call	class [mscorlib]System.IO.Stream VMStreamInitializer::InitializeVMStream(class [mscorlib]System.IO.Stream, uint8[], string)
-        CilOpCodes.Stsfld,      // 14	003F	stsfld	class [mscorlib]System.IO.Stream VMResourceStreamGetter::'stream'
-        CilOpCodes.Ldsfld,      // 15	0044	ldsfld	class [mscorlib]System.IO.Stream VMResourceStreamGetter::'stream'
-        CilOpCodes.Ret          // 16	0049	ret
+        //CilOpCodes.Call,        // 11	0030	call	void [mscorlib]System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(class [mscorlib]System.Array, valuetype [mscorlib]System.RuntimeFieldHandle)
+        //CilOpCodes.Call,        // 12	0035	call	string VMResourceStreamGetter::GetVMResourceModulusString()
+        //CilOpCodes.Call,        // 13	003A	call	class [mscorlib]System.IO.Stream VMStreamInitializer::InitializeVMStream(class [mscorlib]System.IO.Stream, uint8[], string)
+        //CilOpCodes.Stsfld,      // 14	003F	stsfld	class [mscorlib]System.IO.Stream VMResourceStreamGetter::'stream'
+        //CilOpCodes.Ldsfld,      // 15	0044	ldsfld	class [mscorlib]System.IO.Stream VMResourceStreamGetter::'stream'
+        //CilOpCodes.Ret          // 16	0049	ret
     };
     
     public bool Verify(CilInstructionCollection instructions, int index) =>

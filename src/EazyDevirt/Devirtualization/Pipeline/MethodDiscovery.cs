@@ -198,7 +198,7 @@ internal sealed class MethodDiscovery : StageBase
     {
         return method.Signature?.ReturnType.FullName == typeof(int).FullName
                && method.CilMethodBody is { Instructions.Count: 2 }
-               && method.CilMethodBody.Instructions[0].IsLdcI4();
+               && method.CilMethodBody.Instructions[0].IsLdcI4();// IL_0000: ldc.i4    -210662570
     }
 
     private static bool IsLoadVMPositionMethod(MethodDefinition method)

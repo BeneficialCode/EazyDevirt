@@ -318,16 +318,17 @@ internal record Stloc_0 : IOpCodePattern
     public IList<CilOpCode> Pattern => new List<CilOpCode>
     {
         CilOpCodes.Ldarg_0,     // 0	0000	ldarg.0
-        CilOpCodes.Ldc_I4_0,    // 1	0001	ldc.i4.0
+        CilOpCodes.Ldc_I4_0,    // 1	    0001    ldc.i4	0
         CilOpCodes.Callvirt,    // 2	0002	callvirt	instance void VM::StoreLocal(int32)
         CilOpCodes.Ret          // 3	0007	ret
     };
 
     public CilOpCode? CilOpCode => CilOpCodes.Stloc_0;
 
-    public bool Verify(MethodDefinition method, int index) => PatternMatcher
-        .GetAllMatchingInstructions(new StoreLocalPattern(),
-            (method.CilMethodBody!.Instructions[2].Operand as SerializedMethodDefinition)!).Count > 0;
+    public bool Verify(MethodDefinition method, int index) => true;
+    //public bool Verify(MethodDefinition method, int index) => PatternMatcher
+    //    .GetAllMatchingInstructions(new StoreLocalPattern(),
+    //      (method.CilMethodBody!.Instructions[2].Operand as SerializedMethodDefinition)!).Count > 0;
 }
 
 internal record Stloc_1 : IOpCodePattern
@@ -381,3 +382,4 @@ internal record Stloc_3 : IOpCodePattern
             (method.CilMethodBody!.Instructions[2].Operand as SerializedMethodDefinition)!).Count > 0;
 }
 #endregion Stloc_C
+

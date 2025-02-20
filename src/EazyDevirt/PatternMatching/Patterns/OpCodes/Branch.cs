@@ -394,6 +394,7 @@ internal record Switch : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index = 0) =>
+        index +12 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         vmOpCode.SerializedDelegateMethod.CilMethodBody?.Instructions![index + 12].Operand is SerializedMethodDefinition
             setBranchIndexCall &&
         PatternMatcher.MatchesPattern(new SetBranchIndexPattern(), setBranchIndexCall);

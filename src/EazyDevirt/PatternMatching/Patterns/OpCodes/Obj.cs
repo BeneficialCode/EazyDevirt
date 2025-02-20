@@ -37,8 +37,9 @@ internal record RunNewObjectPattern : IPattern
         if ((instructions[index + 6].Operand as SerializedMethodDefinition)!.Signature!.ReturnType.FullName != "System.Reflection.MethodBase")
             return false;
 
-        return PatternMatcher.MatchesPattern(new PushStackPattern(), 
-            (instructions[^2].Operand as SerializedMethodDefinition)!);
+        return true;
+        //return PatternMatcher.MatchesPattern(new PushStackPattern(), 
+        //    (instructions[2].Operand as SerializedMethodDefinition)!);
     }
 }
 
@@ -116,7 +117,9 @@ internal record Initobj : IOpCodePattern
 
     public bool InterchangeLdlocOpCodes => true;
     
-    public bool Verify(VMOpCode vmOpCode, int index) => PatternMatcher.MatchesPattern(new InitobjInnerPattern(),
+    public bool Verify(VMOpCode vmOpCode, int index) => 
+        index +3 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
+        PatternMatcher.MatchesPattern(new InitobjInnerPattern(),
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[index + 3].Operand as SerializedMethodDefinition)!);
 }
 

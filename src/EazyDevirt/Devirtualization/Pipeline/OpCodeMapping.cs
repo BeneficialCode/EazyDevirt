@@ -146,8 +146,8 @@ internal class OpCodeMapping : StageBase
         {
             var opCode = opCodeFieldInstrs[1].GetLdcI4Constant();
             var operandType = opCodeFieldInstrs[2].GetLdcI4Constant();
-            
-            var matchingVMOpCodes = vmOpCodes.Where(x => x.SerializedInstructionField == opCodeFieldInstrs[4].Operand).ToList();
+            var operand = opCodeFieldInstrs[4].Operand;
+            var matchingVMOpCodes = vmOpCodes.Where(x => x.SerializedInstructionField == operand).ToList();
             if (matchingVMOpCodes.Count <= 0 && Ctx.Options.VeryVerbose)
             {
                 Ctx.Console.InfoStr("Unhandled VM opcode", $"{opCode}, {operandType}");
@@ -192,7 +192,7 @@ internal class OpCodeMapping : StageBase
         }
         
         if (Ctx.Options.VeryVerbose)
-            Ctx.Console.InfoStr($"VM opcodes identified ({identified / vmOpCodes.Count:P})", identified);
+            Ctx.Console.InfoStr($"VM opcodes identified ({(float)identified / vmOpCodes.Count:P})", identified);
                 
         return true;
     }

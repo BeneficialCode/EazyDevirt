@@ -82,6 +82,7 @@ internal record Conv_Ovf_I_Un : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index + 6 < instructions.Count &&
         (instructions[index + 6].Operand as SerializedMemberReference)?.FullName ==
         "System.Void System.IntPtr::.ctor(System.Int64)";
 }
@@ -274,6 +275,7 @@ internal record Conv_I4InnerPattern : IPattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index + 3 < instructions.Count &&
         (instructions[index + 3].Operand as SerializedMemberReference)?.FullName ==
         "System.UInt64 System.Convert::ToUInt64(System.Object)";
 }
@@ -337,6 +339,7 @@ internal record Conv_I8InnerPattern : IPattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index + 3 < instructions.Count &&
         (instructions[index + 3].Operand as SerializedMemberReference)?.FullName ==
         "System.UInt64 System.Convert::ToUInt64(System.Object)";
 }
@@ -559,6 +562,7 @@ internal record Conv_Ovf_U_Un : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index + 4 < instructions.Count &&
         (instructions[index + 4].Operand as SerializedMemberReference)?.FullName ==
         "System.Void System.UIntPtr::.ctor(System.UInt64)";
 }

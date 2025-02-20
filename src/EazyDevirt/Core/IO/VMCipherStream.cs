@@ -197,6 +197,10 @@ internal class VMCipherStream : Stream
         {
             ReadRsaBlock();
 
+            if(RsaBytesRead < BlockOffset)
+            {
+                BlockOffset = RsaBytesRead;
+            }
             // if the amount of bytes to read (count) is within the current block, complete the read
             var bytesUntilNextBlock = RsaBytesRead - BlockOffset;
             if (bytesUntilNextBlock > count)

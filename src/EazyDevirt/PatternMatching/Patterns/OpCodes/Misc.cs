@@ -168,6 +168,8 @@ internal record Ldtoken : IOpCodePattern
     {
         var instructions = vmOpCode.SerializedDelegateMethod.CilMethodBody?.Instructions!;
         var resolveFieldCall = instructions[index + 2].Operand as SerializedMethodDefinition;
+        if (resolveFieldCall == null)
+            return false;
         if (!resolveFieldCall!.Signature!.ReturnsValue ||
             resolveFieldCall.Signature.ReturnType.FullName != "System.Reflection.FieldInfo")
             return false;
@@ -271,6 +273,7 @@ internal record Unbox_Any : IOpCodePattern
     public bool InterchangeStlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index + 4 < instructions.Count &&
         instructions[index + 4].Operand is SerializedMethodDefinition { Parameters.Count: 2 } unboxCall &&
         unboxCall.Parameters.All(x => x.ParameterType.FullName is "System.Object" or "System.Type");
 }
@@ -333,6 +336,7 @@ internal record Castclass : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index = 0) =>
+        index < vmOpCode.SerializedDelegateMethod.CilMethodBody?.Instructions.Count &&
         vmOpCode.CilOperandType == CilOperandType.InlineTok &&
         vmOpCode.SerializedDelegateMethod.CilMethodBody?.Instructions[index].Operand is SerializedMemberReference
         {
@@ -387,6 +391,7 @@ internal record Isinst : IOpCodePattern
     public bool InterchangeLdlocOpCodes => true;
 
     public bool Verify(CilInstructionCollection instructions, int index = 0) =>
+        index < instructions.Count &&
         PatternMatcher.MatchesPattern(new IsVMOperandAssignableFromTypePattern(),
             instructions[index].Operand as SerializedMethodDefinition);
 }
@@ -454,6 +459,7 @@ internal record Ldvirtftn : IOpCodePattern
     public bool InterchangeLdcI4OpCodes => true;
 
     public bool Verify(VMOpCode vmOpCode, int index = 0) =>
+        index + 8 < vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions.Count &&
         vmOpCode.SerializedDelegateMethod.CilMethodBody?.Instructions[index + 8].Operand is IMethodDescriptor
         {
             Signature.ReturnType.FullName: "System.Reflection.MethodInfo"
@@ -479,6 +485,8 @@ internal record Sizeof : IOpCodePattern
 
     public bool Verify(CilInstructionCollection instructions, int index = 0)
     {
+        if (index + 2 > instructions.Count)
+            return false;
         var sizeOfCall = instructions[index].Operand as IMethodDescriptor;
         if (sizeOfCall?.FullName != "System.Int32 System.Runtime.InteropServices.Marshal::SizeOf(System.Type)")
             return false;

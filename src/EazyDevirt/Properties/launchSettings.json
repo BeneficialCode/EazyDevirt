@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EazyDevirt": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\Data\\Reverse\\EazFuscator\\Unpack\\UnpackMe1.dec.exe -v3"
+    }
+  }
+}

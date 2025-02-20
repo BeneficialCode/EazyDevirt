@@ -94,7 +94,8 @@ internal record Ldc_I4_S : IOpCodePattern
     public CilOpCode? CilOpCode => CilOpCodes.Ldc_I4_S;
 
     public bool Verify(VMOpCode vmOpCode, int index) =>
-        vmOpCode.CilOperandType == CilOperandType.ShortInlineI && PatternMatcher.MatchesPattern(new PushStackPattern(), 
+        vmOpCode.CilOperandType == CilOperandType.ShortInlineI &&
+        PatternMatcher.MatchesPattern(new PushStackPattern(), 
             (vmOpCode.SerializedDelegateMethod.CilMethodBody!.Instructions[2].Operand as SerializedMethodDefinition)!);
 }
 #endregion Ldc_I
